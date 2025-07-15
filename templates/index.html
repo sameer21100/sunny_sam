@@ -1,0 +1,19 @@
+{%extends "parent.html" %}
+{% block page %}
+
+    <p> Hello  this is the render_templat method of Flask</p>
+            <h2> Today we'll learn how to send data from backend to front end</h2>
+            <!-- <h2> {{content}}</h2> -->
+            <!-- {% for c in content %}
+                {% if c=='Resources'%}
+                <h4> {{c}}  </h4> 
+                <h4> {{c}}  </h4> 
+                {% elif c=='Steal'%}
+                <h4> {{c}}</h4>
+                {% else %}
+                <h4>Null</h4>
+                {%endif%}
+                {% endfor%} -->
+
+                <h4>Welcome {{names}}, there's a typo in the link</h4>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "parent.html" %}
+{% block title%} Login {% endblock%}
+{% block page%}
+<!-- action of the form: simple means where the user will be redirected once they fill and submit the form -->
+<!-- # generally means the we are going to remain on the same page -->
+ <!-- we put method = post when we want to send some data and get when we  want to retrieve some data from the server. -->
+<form action="#" method="post">
+    <p>  First Name</p>
+   <p> <input type="text" name="fname"></p>
+
+    <p>Enter your Mail</p>
+    <p><input type="text" name="gmail"> </p>
+
+    <p><input type="submit" value="Click to Submit"> </p>
+    
+</form>
+
+{%endblock%}
