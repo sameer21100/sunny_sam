@@ -56,16 +56,19 @@ def login():
     if request.method=="POST":
         fname=request.form["fname"]
         mail=request.form["gmail"]
-        session["user"]=fname
-        session["gmail"]=mail
+       
         query=users.query.filter_by(name=fname).first()
         if  query and query.email==mail:
+            session["user"]=fname
+            session["gmail"]=mail
             flash(f"Welcome back")
             session["animal"]=query.animal
         else:
-            usr_obj=users(fname,mail,"")
-            db.session.add(usr_obj)
-            db.session.commit()
+            flash("shi email de betichod")
+            return redirect(url_for("login"))
+            # usr_obj=users(fname,mail,"")
+            # db.session.add(usr_obj)
+            # db.session.commit()
         #These three lines are used to add the data to the database and commit the changes done to the database
 
         flash("You are now logged in")
