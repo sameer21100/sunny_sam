@@ -3,6 +3,26 @@
 <h1>User Page</h1>
 {%endblock%}
 {%block page%}
+<!-- html part of the flash  -->
+{% with messages= get_flashed_messages()%}
+    {%if messages%}
+        {% for msg in messages %}
+            <h3>{{msg}}</h3>
+        {% endfor%}
+    {%endif %}
+{%endwith%}
+<!-- end html file part of the flash -->
+    <form action="#" method="post" >
+        <input type="hidden" name="form_type" value="update_email">
+        <input type="email" name="email" placeholder="Enter you email" value="{{email if email}}" >
+        <input type="submit" value="Saves changes">
+    </form>
+    <form action="#" method="post">
+        <input type="hidden" name="form_type" value="update_animal">
+        <input type="text" name="animal" placeholder="Enter the name of you favourite animal" value="{{animal if animal}}">
+        <input type="submit" value="submit">
+    </form>
 
-<h1> Wasdfelcome {{user}}, you have logged in using {{gmail}}</h1>
+
+<!-- <h3> Welcom <strong> {{user}} </strong>, you have logged in using <strong>{{email}}</strong></h3> -->
 {%endblock%}

@@ -2,17 +2,31 @@ from flask import Flask,redirect,url_for,render_template, request, session, flas
 # we use request to get the data from the frontEnd
 from datetime import timedelta
 # to create a session lifetime 
+from flask_sqlalchemy import SQLAlchemy
+
 
 
 app=Flask(__name__)
-app.secret_key="Hello warld"
 app.permanent_session_lifetime=timedelta(minutes=20)
 # minutes=5
+app.secret_key="Hello warld"
+app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///users.sqlite3.' #users is the name of the object(table) that we are creating
+db=SQLAlchemy(app)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False
 
+class users(db.Model):
+    _id=db.Column("id",db.Integer,primary_key=True)
+    name=db.Column(db.String(100))
+    email=db.Column(db.String(100))
+    animal=db.Column(db.String(50))
+    def __init__(self,name,email,animal):
+        self.name=name
+        self.email=email
+        self.animal=animal
 ##Pass a value from backend to front end using render_template
 @app.route("/")
 def main():
-    return render_template("login.html")
+    return render_template("index.html")
 @app.route("/<name>")# write any route to access this route.here name is the name of variable 
 def home(name): ### we can return an html tag or html page or simple text;
     # return render_template("index.html", content=name, admin='string or name or any variable')   #  content and admin are the variables which can be accessed in html
@@ -44,30 +58,78 @@ def login():
         mail=request.form["gmail"]
         session["user"]=fname
         session["gmail"]=mail
+        query=users.query.filter_by(name=fname).first()
+        if  query and query.email==mail:
+            flash(f"Welcome back")
+            session["animal"]=query.animal
+        else:
+            usr_obj=users(fname,mail,"")
+            db.session.add(usr_obj)
+            db.session.commit()
+        #These three lines are used to add the data to the database and commit the changes done to the database
+
         flash("You are now logged in")
+        session.permanent=True
         return redirect(url_for("user"))    
         # return redirect(url_for("home",name=fname)) this just simply sends the front end data to backend and redirects to a page
     else:
         if "user" in session:
+            flash("You are already logged in","danger")
             return redirect(url_for("user"))
 
         return render_template("login.html")
-@app.route("/user")
+@app.route("/user",methods=["POST","GET"])
 def user():
-    session.permanent=True
+    name=session["user"]
+    animal=None
+    if request.method =="POST":
+        form_type=request.form.get("form_type")
+        if form_type=="update_animal":
+            flash("Janawar's name has been updated")
+            animal=request.form["animal"]
+            print(animal)
+            session["animal"]=animal
+            name=session["user"]
+            usr_obj=users.query.filter_by(name=name).first()
+            if usr_obj:
+                usr_obj.animal=animal
+                db.session.add(usr_obj)
+                db.session.commit()
+            else:
+                flash("No such user found","danger")
+        elif form_type=="update_email":
+            flash("Email chanded succussfully")
+            gmail=request.form["email"]
+            session["gmail"]=gmail
+            fname=session["user"]
+            usr_obj=users.query.filter_by(name=fname).first()
+            usr_obj.email=gmail
+            db.session.commit()
     if "user" in session:
-        user=session["user"]
-        gmail=session["gmail"]
-        return render_template("user.html",user=user,gmail=gmail)
+        usr_obj=users.query.filter_by(name=name).first()
+        animal=usr_obj.animal
+        gmail=usr_obj.email
+        # animal=session["animal"]
+        return render_template("user.html",user=user,email=gmail,animal=animal)
     else:
         flash("You need to login first","info")
         return redirect(url_for("login"))
+    
 #To remove all the stored session history, session is like a dictionary.
 @app.route("/logout")
 def logout():
-    session.pop("user",None)
-    session.pop("gmail",None)
+    if "user" in session:
+        user=session["user"]
+        session.pop("user",None)
+        session.pop("gmail",None)
+        session.pop("animal",None)
+        flash(f"The user {user} has been logged out successfully")
+        
+    else:
+        flash("Madharchod login kar pehle")
     return redirect(url_for("login"))
 
 if(__name__)=="__main__":
+    with app.app_context():
+        db.create_all()#create database if it doesn't already exists.,above the app.run so that app dosen't give error referrring to db
     app.run(debug=True) #to allow the changes made to automatically reflect on to the website
