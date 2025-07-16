@@ -54,17 +54,17 @@ def home(name): ### we can return an html tag or html page or simple text;
 @app.route("/login",methods=["POST","GET"])
 def login():
     if request.method=="POST":
-        fname=request.form["fname"]
-        mail=request.form["gmail"]
+        fname=request.form["fname"].strip()
+        mail=request.form["gmail"].strip()
        
-        query=users.query.filter_by(name=fname).first()
-        if  query and query.email==mail:
-            session["user"]=fname
-            session["gmail"]=mail
-            flash(f"Welcome back")
+        query=users.query.filter_by(name=fname, email=mail).first()
+        if  query :
+            session["user"]=query.name
+            session["gmail"]=query.email
             session["animal"]=query.animal
+            flash(f"Welcome back")
         else:
-            flash("shi email de betichod")
+            flash("Provide correct email or signup ")
             return redirect(url_for("login"))
             # usr_obj=users(fname,mail,"")
             # db.session.add(usr_obj)
@@ -84,6 +84,7 @@ def login():
 @app.route("/user",methods=["POST","GET"])
 def user():
     name=session["user"]
+    mail=session["gmail"]
     animal=None
     if request.method =="POST":
         form_type=request.form.get("form_type")
@@ -109,7 +110,7 @@ def user():
             usr_obj.email=gmail
             db.session.commit()
     if "user" in session:
-        usr_obj=users.query.filter_by(name=name).first()
+        usr_obj=users.query.filter_by(name=name,email=mail).first()
         animal=usr_obj.animal
         gmail=usr_obj.email
         # animal=session["animal"]
@@ -118,6 +119,22 @@ def user():
         flash("You need to login first","info")
         return redirect(url_for("login"))
     
+
+@app.route("/signup", methods=["POST","GET"])
+def signup():
+    if request.method=="POST":
+        name=request.form["name"]
+        email=request.form["email"]
+        query=users.query.filter_by(name=name, email=email).first()
+        if query:
+            flash("This user already exits try to login")
+        else:
+            usr_obj=users(name,email,"")
+            db.session.add(usr_obj)
+            db.session.commit()
+            flash("Account create successfully")
+        return redirect(url_for("login"))
+    return render_template("signup.html")
 #To remove all the stored session history, session is like a dictionary.
 @app.route("/logout")
 def logout():
