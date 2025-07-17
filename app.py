@@ -26,6 +26,7 @@ class users(db.Model):
 ##Pass a value from backend to front end using render_template
 @app.route("/")
 def main():
+
     return render_template("index.html")
 @app.route("/<name>")# write any route to access this route.here name is the name of variable 
 def home(name): ### we can return an html tag or html page or simple text;
@@ -91,16 +92,15 @@ def user():
         if form_type=="update_animal":
             flash("Janawar's name has been updated")
             animal=request.form["animal"]
-            print(animal)
             session["animal"]=animal
             name=session["user"]
             usr_obj=users.query.filter_by(name=name).first()
-            if usr_obj:
-                usr_obj.animal=animal
-                db.session.add(usr_obj)
-                db.session.commit()
-            else:
-                flash("No such user found","danger")
+            usr_obj.animal=animal
+            gmail=usr_obj.email
+            # print(usr_    obj.animal)
+            db.session.commit()
+            return redirect(url_for("user"))
+            
         elif form_type=="update_email":
             flash("Email chanded succussfully")
             gmail=request.form["email"]
@@ -109,16 +109,43 @@ def user():
             usr_obj=users.query.filter_by(name=fname).first()
             usr_obj.email=gmail
             db.session.commit()
+            return redirect(url_for("user"))
     if "user" in session:
         usr_obj=users.query.filter_by(name=name,email=mail).first()
         animal=usr_obj.animal
         gmail=usr_obj.email
+
         # animal=session["animal"]
         return render_template("user.html",user=user,email=gmail,animal=animal)
     else:
         flash("You need to login first","info")
         return redirect(url_for("login"))
     
+@app.route("/clean_data")
+def clean():
+    usr_obj=users.query.all()
+    seen=set()
+    to_del=[]
+    for user in usr_obj:
+        identifier=user.name.strip().lower()+"#@#"+user.email.strip().lower()
+        if identifier in seen:
+            to_del.append(user)
+        else:
+            seen.add(identifier)
+    for user in to_del:
+        db.session.delete(user)
+    db.session.commit()
+    if len(to_del)==0:
+        return f"No users were duplicate"
+    return f"Removed users are {len(to_del)} in nuumber"
+    
+@app.route("/view")
+def view():
+    if "user" in session:
+        return render_template("view.html", values=users.query.all())
+    else:
+        flash("Please login first")
+        return redirect(url_for("login"))
 
 @app.route("/signup", methods=["POST","GET"])
 def signup():
@@ -146,7 +173,7 @@ def logout():
         flash(f"The user {user} has been logged out successfully")
         
     else:
-        flash("Madharchod login kar pehle")
+        flash("Please Login kar pehle")
     return redirect(url_for("login"))
 
 if(__name__)=="__main__":

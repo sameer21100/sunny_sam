@@ -1,0 +1,10 @@
+{%extends "parent.html"%}
+{%block title%}
+View all Users
+{%endblock%}
+{%block page%}
+    {%for user in values%}
+        <p>UserName: {{user.name}}  Pet Animal: {{user.animal}}, <br> UserEmail:{{user.email}}</p>
+
+    {%endfor%}
+{%endblock%}
