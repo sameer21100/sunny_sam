@@ -1,0 +1,15 @@
+body{ color:white;
+    text-align: center;
+
+    /* filter:blur(5px); */
+}
+.background-img{
+    background-image: url("/static/images/img.png");
+    z-index: -1;
+    height: 100%;
+    width:100%;
+    filter:blur(10px);
+    position: fixed;
+    
+
+}
